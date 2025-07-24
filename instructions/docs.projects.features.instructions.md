@@ -13,7 +13,6 @@ applyTo: "**/docs/projects/**/features/*.md"
 
 ```
 ---
-milestone: 2028.01.01
 is-done: false
 priority: 0
 ---
@@ -47,6 +46,5 @@ priority: 0
 
 ## font matter
 
-- `milestone`: カレンダーバージョニング（default: null）
 - `is-done`: 完了（default: null）
 - `priority`: 優先度（default: 0）
