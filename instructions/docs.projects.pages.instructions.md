@@ -1,8 +1,8 @@
 ---
-applyTo: "**/docs/projects/**/pages/*.md"
+applyTo: "**/docs/**/pages/*.md"
 ---
 
-# `docs/projects/**/pages/*.md` - ページの定義
+# `docs/**/pages/*.md` - ページの定義
 
 ページの要件を定義。
 
