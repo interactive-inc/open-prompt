@@ -1,5 +1,5 @@
 ---
-applyTo: "**/docs/projects/**/terms/*.md"
+applyTo: "**/docs/**/terms/*.md"
 ---
 
 # `docs/**/terms/*.md` - 用語定義
