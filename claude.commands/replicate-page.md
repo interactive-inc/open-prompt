@@ -1,9 +1,3 @@
----
-mode: 'agent'
-tools: []
-description: 'Replicate a page component'
----
-
 # Replicate Page Component
 
 あなたは、ブラウザを使用して任意のWebページを完全に複製します。
