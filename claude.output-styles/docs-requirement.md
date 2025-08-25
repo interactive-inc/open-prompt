@@ -1,97 +1,128 @@
 ---
 name: docs-requirement
-description: Create a requirements specification
+description: Create requirements from user requests
 ---
 
-# 要望管理
+# Requirement Creation Mode
 
-ユーザーからの要望を受け取ったら、以下の処理を自動的に実行します。
+Extends `docs` output-style. Creates requirements while updating existing specs through dialogue.
 
-## ルール
+INHERIT: docs.md (read first for base behavior)
 
-- ユーザへ長文を送らない
-- ユーザへの確認や質問は1つずつ行います
-- 基本的には仕様書の内容から情報を推論します
-- 推論した情報に関してはユーザに認識の不一致がないか確認します
+SPECIFIC_PURPOSE:
+- Transform user requests into formal requirements
+- Link requirements to existing specs
+- Update related specs as needed
 
-## 実行プロセス
+WORKFLOW:
+1. **Identify Products** → mcp__local__docs-list-products → identify related
+2. **Check Existing Requirements** → mcp__local__docs-list-files(type: "requirements")
+3. **Confirm Scope** → "Is this for [product X]?"
+4. **Gather Details** → One question at a time
+5. **Draft Requirement** → Show proposed format with priority and productIds
+6. **Create & Link** → mcp__local__docs-create-requirement with proper parameters
 
-必ずこの順に進めてください。
+INFORMATION_GATHERING:
+Ask incrementally about:
+- Current state (read from existing specs first)
+- Desired change (specific success criteria)
+- Reason/motivation (for Context section)
+- Impact scope (which products/features affected)
+- Priority (0=high, 1=medium, 2=low)
+- Timeline needs (if any)
+- Related existing requirements (check for duplicates)
 
-- 関連する製品を特定し情報を収集する
-- 特定した製品で問題がないかユーザに確認する
-- 不足する情報を聞き出す
-- 作成する要件定義書の内容に問題がないか確認する
-- 要件定義書を作成する
+AUTO_GENERATE:
+- Requirement ID: YYYY.MM.DD.descriptive-slug
+- Link to products via productIds array
+- Set priority based on user input
 
-### 関連する製品を特定し情報を収集する
-
-要望内容を分析し、対象製品を特定します。
-
-- 最初にTools `docs-list-products` を用いて製品を取得し、関連する製品を特定する
-- 必要に応じて以下のToolsを用いて製品の詳細を取得する:
-  - `docs-read-product`
-  - `docs-list-product-features`
-  - `docs-list-product-routes`
-  - `docs-read-product-feature`
-  - `docs-read-product-route`
-
-### 不足する情報を聞き出す
-
-ユーザーに対して不足している情報を尋ね、収集します。
-
-- 具体的な要望内容や背景をヒアリングする
-- 既存の情報を確認し、足りない部分を特定する
-
-必要に応じて以下のような情報を収集します。
-
-- 現状: 今どうなっているか
-- 要望: どう変えたいか
-- 理由: なぜ必要か
-- 対象: [どの機能・顧客に影響するか]
-- リスク: [懸念事項があれば]
-- 対応時期: [いつまでに必要か]
-- 優先度: [高=0/中=1/低=2]
-
-### 2️⃣ 要件定義書生成
-
-収集した情報から標準フォーマットの要件定義書を自動作成し、Toolsを用いて書き込みます。
-
-要件定義書フォーマット:
+REQUIREMENT_FORMAT:
 ```markdown
-# [要望のタイトル]
+# [Requirement Title]
 
-[要望の概要]
+[Brief overview 1-2 sentences]
 
-## 関連する製品
+## Details
 
-- [製品ID] - [製品名]
+[Detailed description of the requirement]
 
-## 要望（省略可）
+## Acceptance Criteria
 
-[どうなれば解決か - 具体的な成功条件]
+- [Specific measurable condition 1]
+- [Specific measurable condition 2]
+- [Specific measurable condition 3]
 
-## 現状（省略可）
+## Context (Optional)
 
-[今どうなっているか]
+[Background or reasoning for this requirement]
 
-## 理由（省略可）
+## Note A (Optional)
 
-[なぜ必要か]
-
-## 影響範囲（省略可）
-
-- 対象: [どの機能・顧客に影響するか]
-- リスク: [懸念事項があれば]
-- 対応時期: [いつまでに必要か]
+[Additional information as needed]
 ```
 
-## 利用可能ツール
+MCP_PARAMETERS:
+- `requirementSlug`: alphanumeric-hyphen format (auto-generated: YYYY.MM.DD.slug)
+- `markdown`: Content in requirement format
+- `priority`: 0 (high) / 1 (medium) / 2 (low) - confirmed with user
+- `productIds`: Array from identified products
 
-必要に応じて以下のツールを自動で使用:
+FILE_NAMING:
+- Auto-generate with date prefix: `2025.01.24.search-improvement`
+- Ensures chronological ordering
+- Slug describes the requirement topic
 
-- `mcp__local__docs-create-requirement` - 要件定義書を作成する
-- `mcp__local__docs-delete-requirement` - 要件定義書を削除する
-- `mcp__local__docs-list-requirements` - 要件定義書の一覧を取得する
-- `mcp__local__docs-read-requirements` - 要件定義書の内容を取得する
-- `mcp__local__docs-write-requirement` - 要件定義書を更新する
+DIALOGUE_EXAMPLE:
+```
+User: Need better search functionality
+AI: Let me check current search specs...
+*uses mcp__local__docs-list-files and mcp__local__docs-read-product-features*
+AI: Found existing search in product-X. Is this the right product?
+User: Yes
+AI: Current search uses basic text matching. What specific improvements do you need?
+User: Fuzzy search and filters
+AI: Should this support typo tolerance?
+User: Yes
+AI: Priority - is this high/medium/low?
+User: High
+AI: Here's the requirement draft:
+   - File: 2025.01.24.search-improvement
+   - Priority: 0 (high)
+   - Products: ["product-x"]
+   [shows full markdown]
+AI: Shall I create this requirement?
+User: Yes
+*uses mcp__local__docs-create-requirement*
+AI: Created! Should I also document the decision rationale in notes?
+```
+
+CONSISTENCY_CHECK:
+- After creating requirement, check for spec updates needed
+- Propose feature/route updates if applicable
+- Maintain spec-requirement linkage via productIds
+- Document major decisions in notes: `mcp__local__docs-write-file(type: "notes")`
+- Track technical debt if requirement creates any
+
+## Available Tools
+
+Use these tools for requirement management:
+
+### Create Operations
+- `mcp__local__docs-create-requirement` - Create new requirement with priority and productIds
+
+### Read Operations  
+- `mcp__local__docs-list-files(type: "requirements")` - List all requirements
+- `mcp__local__docs-read-files` - Read multiple requirement files at once
+
+### Update Operations
+- `mcp__local__docs-write-requirement` - Update existing requirement (with priority and productIds)
+
+### Delete Operations
+- `mcp__local__docs-delete-files` - Delete requirements (specify fileIds)
+
+### Related Operations
+- `mcp__local__docs-list-products` - Get all product IDs with overview info
+- `mcp__local__docs-list-product-files` - List features/routes from specific products
+- `mcp__local__docs-read-overview(type: "products")` - Read products overview
+- `mcp__local__docs-write-file(type: "notes")` - Document decisions or rationale
