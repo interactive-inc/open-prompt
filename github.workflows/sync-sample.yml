@@ -67,7 +67,7 @@ jobs:
           rm -rf TO/.github/prompts
           mkdir -p TO/.github
           mkdir -p TO/.github/prompts
-          echo "$GITHUB_PROMPTS" | xargs -I {} cp "FROM/$GITHUB_PROMPTS_FROM/{}" "TO/.github/instructions/{}"
+          echo "$GITHUB_PROMPTS" | xargs -I {} cp "FROM/$GITHUB_PROMPTS_FROM/{}" "TO/.github/prompts/{}"
       - name: ✴️ Sync .claude/agents
         run: |
           rm -rf TO/.claude/agents
@@ -87,6 +87,10 @@ jobs:
         run: |
           rm -rf TO/$DOCS_FROM
           cp -r FROM/$DOCS_TO TO/$DOCS_FROM
+      - name: 🍎 Sync mcp
+        run: |
+          rm -rf TO/mcp
+          cp -r FROM/mcp TO/mcp
       - name: 🚀 Commit and push changes
         run: |
           cd TO
