@@ -1,0 +1,104 @@
+name: Sync sample
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/sample.yml"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - "github.instructions/*"
+      - "docs/sample/**"
+      - "claude.output-styles/*"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target_repo:
+          - RyukyuInteractive/sample
+    env:
+      GIT_USER_NAME: RyukyuInteractive
+      GIT_USER_EMAIL: <>
+      GIT_COMMIT_MESSAGE: "from RyukyuInteractive/inta"
+      DOCS_FROM: .docs
+      DOCS_TO: docs/sample
+      GITHUB_INSTRUCTIONS_FROM: github.instructions
+      GITHUB_INSTRUCTIONS: |
+        core.instructions.md
+        ts.instructions.md
+      GITHUB_PROMPTS_FROM: github.prompts
+      GITHUB_PROMPTS: |
+        en.prompt.md
+      CLAUDE_AGENTS_FROM: claude.agents
+      CLAUDE_AGENTS: |
+        biome-errors-checker.md
+      CLAUDE_COMMANDS_FROM: claude.commands
+      CLAUDE_COMMANDS: |
+        instructions.md
+      CLAUDE_OUTPUT_STYLES_FROM: claude.output-styles
+      CLAUDE_OUTPUT_STYLES: |
+        docs.md
+    steps:
+      - name: 💪 Checkout source repository
+        uses: actions/checkout@v3
+        with:
+          path: FROM
+      - name: 💪 Checkout target repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ matrix.target_repo }}
+          path: TO
+          token: ${{ secrets.PAT_TOKEN }}
+      - name: ⚙️ Sync config files
+        run: |
+          cp "FROM/.editorconfig" "TO/.editorconfig"
+      - name: 🐙 Sync .github files
+        run: |
+          mkdir -p TO/.github
+          cp "FROM/.github/PULL_REQUEST_TEMPLATE.md" "TO/.github/PULL_REQUEST_TEMPLATE.md"
+      - name: 🐙 Sync .github/instructions
+        run: |
+          rm -rf TO/.github/instructions
+          mkdir -p TO/.github
+          mkdir -p TO/.github/instructions
+          echo "$GITHUB_INSTRUCTIONS" | xargs -I {} cp "FROM/$GITHUB_INSTRUCTIONS_FROM/{}" "TO/.github/instructions/{}"
+      - name: 🐙 Sync .github/prompts
+        run: |
+          rm -rf TO/.github/prompts
+          mkdir -p TO/.github
+          mkdir -p TO/.github/prompts
+          echo "$GITHUB_PROMPTS" | xargs -I {} cp "FROM/$GITHUB_PROMPTS_FROM/{}" "TO/.github/instructions/{}"
+      - name: ✴️ Sync .claude/agents
+        run: |
+          rm -rf TO/.claude/agents/_
+          mkdir -p TO/.claude/agents
+          mkdir -p TO/.claude/agents/_
+          echo "$CLAUDE_AGENTS" | xargs -I {} cp "FROM/$CLAUDE_AGENTS_FROM/{}" "TO/.claude/agents/_/{}"
+      - name: ✴️ Sync .claude/commands
+        run: |
+          rm -rf TO/.claude/commands/:
+          mkdir -p TO/.claude/commands
+          mkdir -p TO/.claude/commands/:
+          echo "$CLAUDE_COMMANDS" | xargs -I {} cp "FROM/$CLAUDE_COMMANDS_FROM/{}" "TO/.claude/commands/:/{}"
+      - name: ✴️ Sync .claude/output-styles
+        run: |
+          rm -rf TO/.claude/output-styles/_
+          mkdir -p TO/.claude/output-styles
+          mkdir -p TO/.claude/output-styles/_
+          echo "$CLAUDE_OUTPUT_STYLES" | xargs -I {} cp "FROM/$CLAUDE_OUTPUT_STYLES_FROM/{}" "TO/.claude/output-styles/_/{}"
+      - name: 📁 Sync .docs
+        run: |
+          rm -rf TO/$DOCS_FROM
+          cp -r FROM/$DOCS_TO TO/$DOCS_FROM
+      - name: 🚀 Commit and push changes
+        run: |
+          cd TO
+          git config user.name "$GIT_USER_NAME"
+          git config user.email "$GIT_USER_EMAIL"
+          git add $DOCS_FROM/
+          git add .
+          git diff --staged --quiet || git commit -m "$GIT_COMMIT_MESSAGE"
+          git push
