@@ -93,10 +93,14 @@ jobs:
         run: |
           rm -rf TO/$DOCS_FROM
           cp -r FROM/$DOCS_TO TO/$DOCS_FROM
+      - name: 🍞 Setup Bun
+        uses: oven-sh/setup-bun@v2
       - name: 🍎 Sync mcp
         run: |
           rm -rf TO/mcp
           cp -r FROM/mcp TO/mcp
+          cd TO
+          bun i zod@latest @modelcontextprotocol/sdk@latest @interactive-inc/docs-client@latest
       - name: 🚀 Commit and push changes
         run: |
           cd TO
