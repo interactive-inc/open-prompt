@@ -80,9 +80,10 @@ jobs:
       - name: ✴️ Sync .claude/commands
         run: |
           rm -rf TO/.claude/commands/:
+          rm -rf TO/.claude/commands/_
           mkdir -p TO/.claude/commands
-          mkdir -p TO/.claude/commands/:
-          echo "$CLAUDE_COMMANDS" | xargs -I {} cp "FROM/$CLAUDE_COMMANDS_FROM/{}" "TO/.claude/commands/:/{}"
+          mkdir -p TO/.claude/commands/_
+          echo "$CLAUDE_COMMANDS" | xargs -I {} cp "FROM/$CLAUDE_COMMANDS_FROM/{}" "TO/.claude/commands/_/{}"
       - name: ✴️ Sync .claude/output-styles
         run: |
           rm -rf TO/.claude/output-styles/_
