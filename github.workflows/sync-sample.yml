@@ -34,7 +34,7 @@ jobs:
         biome-errors-checker.md
       CLAUDE_COMMANDS_FROM: claude.commands
       CLAUDE_COMMANDS: |
-        instructions.md
+        init.md
       CLAUDE_OUTPUT_STYLES_FROM: claude.output-styles
       CLAUDE_OUTPUT_STYLES: |
         docs.md
