@@ -23,8 +23,8 @@ jobs:
       GIT_USER_NAME: RyukyuInteractive
       GIT_USER_EMAIL: <>
       GIT_COMMIT_MESSAGE: "from RyukyuInteractive/inta"
-      DOCS_FROM: .docs
-      DOCS_TO: docs/sample
+      DOCS_TO: .docs
+      DOCS_FROM: docs/sample
       GITHUB_INSTRUCTIONS_FROM: github.instructions
       GITHUB_INSTRUCTIONS: |
         core.instructions.md
@@ -85,8 +85,8 @@ jobs:
           echo "$CLAUDE_OUTPUT_STYLES" | xargs -I {} cp "FROM/$CLAUDE_OUTPUT_STYLES_FROM/{}" "TO/.claude/output-styles/{}"
       - name: 📁 Sync .docs
         run: |
-          rm -rf TO/$DOCS_FROM
-          cp -r FROM/$DOCS_TO TO/$DOCS_FROM
+          rm -rf TO/$DOCS_TO
+          cp -r FROM/$DOCS_FROM TO/$DOCS_TO
       - name: 🍞 Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: 🍎 Sync mcp
