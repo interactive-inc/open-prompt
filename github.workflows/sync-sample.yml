@@ -31,7 +31,7 @@ jobs:
         ts.instructions.md
       CLAUDE_AGENTS_FROM: claude.agents
       CLAUDE_AGENTS: |
-        biome-errors-checker.md
+        biome-checker.md
       CLAUDE_COMMANDS_FROM: claude.commands
       CLAUDE_COMMANDS: |
         init.md
