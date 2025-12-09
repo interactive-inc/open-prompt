@@ -31,10 +31,10 @@ jobs:
         ts.instructions.md
       CLAUDE_AGENTS_FROM: claude.agents
       CLAUDE_AGENTS: |
-        biome-checker.md
+        md-checker.md
       CLAUDE_COMMANDS_FROM: claude.commands
       CLAUDE_COMMANDS: |
-        init.md
+        copilot-instructions.md
       CLAUDE_OUTPUT_STYLES_FROM: claude.output-styles
       CLAUDE_OUTPUT_STYLES: |
         docs.md

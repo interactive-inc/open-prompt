@@ -1,5 +1,4 @@
 ---
-mode: 'edit'
 description: 'Translate the currently open file into English.'
 ---
 
