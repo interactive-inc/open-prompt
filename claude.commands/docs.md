@@ -1,5 +1,4 @@
 ---
-name: docs-check
 description: Proactive specification quality improvement through consistency checks
 color: purple
 ---

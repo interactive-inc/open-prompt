@@ -4,26 +4,16 @@ description: Fix bugs in the codebase
 
 # Fix bugs
 
-Fix all errors by calling appropriate Subagents to modify files. Repeat command execution until all problems are resolved.
+エラーを検出するコマンドを実行し、エラーが検出されなくなるまで修正を繰り返す。
 
-- TypeScript Errors: `bun tsgo --noEmit`
-- Biome Errors: `bun biome check . --fix --unsafe`
-- Bun Test Errors: `bun test`
+## Steps
 
-## Fix Any Types
+1. エラー検出コマンドを実行する
+2. 検出されたエラーを修正する
+3. 再度コマンドを実行し、エラーが残っていれば修正を繰り返す
+4. エラーが検出されなくなったら完了
 
-Find and replace `as any` type assertions with proper TypeScript types.
+## Caution
 
-### Steps
-
-1. Search codebase for `as any` usage
-2. Analyze context and determine correct type
-3. Replace with specific type annotations
-4. Verify with `bun tsgo --noEmit`
-
-### Common Patterns
-
-- Event handlers: `as React.MouseEvent<HTMLButtonElement>`
-- API responses: Define interface or use existing types
-- Third-party libraries: Import proper types or create type declarations
-- DOM elements: Use specific HTMLElement types
+- ライブラリのバージョンを下げるなど、根本的な解決にならない方法は使用しない
+- 解決が困難な場合は、ユーザーにその旨を伝えて指示を仰ぐ

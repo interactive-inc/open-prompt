@@ -27,7 +27,6 @@ jobs:
       DOCS_FROM: docs/sample
       GITHUB_INSTRUCTIONS_FROM: github.instructions
       GITHUB_INSTRUCTIONS: |
-        core.instructions.md
         ts.instructions.md
       GITHUB_PROMPTS_FROM: github.prompts
       GITHUB_PROMPTS: |
@@ -37,7 +36,7 @@ jobs:
         md-checker.md
       CLAUDE_COMMANDS_FROM: claude.commands
       CLAUDE_COMMANDS: |
-        copilot-instructions.md
+        codebase.md
       CLAUDE_OUTPUT_STYLES_FROM: claude.output-styles
       CLAUDE_OUTPUT_STYLES: |
         docs.md
