@@ -1,22 +1,24 @@
 ---
-description: 'Refactor the code to improve its structure and readability.'
+description: Check if staged files comply with coding rules before commit
 ---
 
-# Refactor
+# Check Rules Compliance
 
-CLAUDE.md に従ってコーディング規約・設計方針を守りながらコードベース全体をリファクタリングし、品質チェックコマンドを実行して問題がなくなるまで修正を繰り返す。
+変更ファイルがコーディングルールに準拠しているか確認する。
 
 ## Steps
 
-1. CLAUDE.md の内容を確認する
-2. コードベース全体を確認し、規約違反や設計上の問題を洗い出す
-3. リファクタリングを実施する
-4. コード品質チェックコマンドを実行する
-5. 問題が検出された場合は修正する
-6. 再度コマンドを実行し、問題が残っていれば修正を繰り返す
-7. 問題が検出されなくなったら完了
+1. 変更ファイルの一覧を取得する
+   - `git status --short` - すべての変更
+   - `git diff --name-only` - unstaged の変更
+   - `git diff --cached --name-only` - staged の変更
+2. 変更されたファイルの拡張子やパスから、適用されるルールを特定する
+   - ルールファイル: `.claude/rules`
+3. 各ファイルの内容を確認し、ルール違反がないかチェックする
+4. 違反があれば修正する
+5. すべてのファイルがルールに準拠していることを確認して完了
 
 ## Caution
 
-- ライブラリのバージョンを下げるなど、根本的な解決にならない方法は使用しない
-- 解決が困難な場合は、ユーザーにその旨を伝えて指示を仰ぐ
+- ルールに明記されていない事項は修正しない
+- 軽微な違反でも修正する
