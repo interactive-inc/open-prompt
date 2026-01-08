@@ -1,5 +1,5 @@
 ---
-paths: ".docs/**/pages/*.md"
+paths: "{.docs,docs}/**/pages/*.md"
 ---
 
 # Pages Template
@@ -8,7 +8,7 @@ paths: ".docs/**/pages/*.md"
 
 ## Naming
 
-Route path を変換: `/` → `home.md`, `/about` → `about.md`, `/a/b` → `a.b.md`
+Route path を変換: `/` → `index.md`, `/about` → `about.md`, `/a/b` → `a.b.md`
 
 ## Template
 

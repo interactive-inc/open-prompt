@@ -1,5 +1,5 @@
 ---
-paths: ".docs/**/notes/*.md"
+paths: "{.docs,docs}/**/notes/*.md"
 ---
 
 # Notes Template

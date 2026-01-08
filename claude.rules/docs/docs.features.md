@@ -1,5 +1,5 @@
 ---
-paths: ".docs/**/features/*.md"
+paths: "{.docs,docs}/**/features/*.md"
 ---
 
 # Features Template

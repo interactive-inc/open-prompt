@@ -1,5 +1,5 @@
 ---
-paths: ".docs/**/terms/*.md"
+paths: "{.docs,docs}/**/terms/*.md"
 ---
 
 # Terms Template

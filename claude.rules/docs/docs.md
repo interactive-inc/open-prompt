@@ -1,5 +1,5 @@
 ---
-paths: "docs/**/*.md"
+paths: "{.docs,docs}/**/*.md"
 ---
 
 # Docs Management
