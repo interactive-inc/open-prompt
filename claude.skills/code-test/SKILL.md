@@ -1,5 +1,5 @@
 ---
-name: bun-test
+name: code-test
 description: Bunを用いたテストを作成・編集します。テストを作成する際、ファイル「*.test.ts」を編集する際に呼び出します。
 ---
 
