@@ -3,13 +3,13 @@ name: infer-design-rules
 description: Analyze existing code to extract patterns and conventions, then document them as design guidelines. Use this skill when you want to derive consistent rules from a codebase and keep design documentation in sync with actual implementation.
 ---
 
-# Design Guidelines
+# Infer Design Rules
 
 デザインガイドラインを参照した開発と、決定事項の追記を行う。
 
 ## ガイドラインの場所
 
-`.claude/rules/design.md`
+`.claude/skills/ui-design/SKILL.md`
 
 ## 開発時の基本方針
 
@@ -33,7 +33,7 @@ description: Analyze existing code to extract patterns and conventions, then doc
 ## ガイドライン更新手順
 
 1. 会話履歴からデザインに関する決定事項を抽出
-2. 現在のガイドラインを読み込み
+2. `.claude/skills/ui-design/SKILL.md` を読み込み
 3. 新しい内容を適切なセクションに追記
 4. 重複や矛盾がないか確認
 5. ユーザーに追記内容を提示して確認を得る
