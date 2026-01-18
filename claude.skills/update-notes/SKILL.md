@@ -1,5 +1,5 @@
 ---
-name: check-notes
+name: update-notes
 description: 開発中の問題解決と知見の記録。エラーや予期しない動作に遭遇したら既存のnotesを確認し、新しい発見はnotesに記録する。未解決の問題はissuesに記録する。「このエラーの解決策は？」「なぜ動かない？」などのリクエスト時に使用。
 ---
 
@@ -129,3 +129,33 @@ issues に記録した問題が解決したら:
 
 1. 解決策を notes に記録
 2. issues のファイルを削除
+
+### CLAUDE.md との使い分け
+
+| 場所 | 用途 |
+|------|------|
+| CLAUDE.md の Issues セクション | 重要な問題をシンプルに箇条書き |
+| .claude/issues/ | 詳細な調査結果・再現手順・試したこと |
+
+CLAUDE.md は概要、.claude/issues/ は詳細という関係。
+
+## CLAUDE.md への案内追加
+
+notes または issues を新規作成した場合、CLAUDE.md にこれらのディレクトリに関する案内がなければ追加する。
+
+### 確認方法
+
+```bash
+grep -E "\.claude/(notes|issues)" CLAUDE.md
+```
+
+### 案内がない場合
+
+CLAUDE.md の適切な場所 (Notes セクションの後など) に以下を追加:
+
+```markdown
+## Development Notes
+
+- `.claude/notes/` - 解決済みの知見・ベストプラクティス
+- `.claude/issues/` - 未解決の問題・調査中の課題
+```

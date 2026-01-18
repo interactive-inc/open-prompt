@@ -1,6 +1,7 @@
 ---
 name: test-react-components
-description: "app/components の単体テストを作成・実行・修正する。React Testing Library + happy-dom を使用。Use when: コンポーネントのテスト作成、テスト実行、テスト修正を依頼された時。"
+description: "app/components の単体テストを作成・実行・修正する。React Testing Library + happy-dom を使用。"
+disable-model-invocation: true
 ---
 
 # Test Components

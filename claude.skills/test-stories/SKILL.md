@@ -1,6 +1,7 @@
 ---
 name: test-stories
 description: ユーザーストーリーからE2Eテストを作成・更新するスキル。.docs/experience/stories/のストーリーに基づいてPlaywrightテストを生成する。
+disable-model-invocation: true
 ---
 
 # 指示
