@@ -1,12 +1,28 @@
 ---
 name: test-stories
-description: ユーザーストーリーからE2Eテストを作成・更新するスキル。.docs/experience/stories/のストーリーに基づいてPlaywrightテストを生成する。
+description: ユーザーストーリーからE2Eテストを作成・更新するスキル。.docs/のストーリーに基づいてPlaywrightテストを生成する。
 disable-model-invocation: true
 ---
 
 # 指示
 
 このスキルが呼び出されたら、以下の手順を実行する。
+
+
+## ストーリーディレクトリの特定
+
+まず `.docs/` の構成を確認してストーリーのパスを特定する。
+
+```bash
+ls .docs/
+```
+
+パターン:
+
+- `products/` がある → `.docs/products/{product}/stories/` (複数製品)
+- `product/` がある → `.docs/product/stories/` (単一製品)
+
+以降、特定したパスを `STORIES_DIR` として使用する。
 
 
 ## 初期セットアップ確認
@@ -43,7 +59,7 @@ sleep 3
 
 ```bash
 # 全ストーリーファイルを一覧
-ls .docs/experience/stories/*.md
+ls $STORIES_DIR/*.md
 ```
 
 
@@ -51,7 +67,7 @@ ls .docs/experience/stories/*.md
 
 ```bash
 # ストーリーファイル一覧
-ls .docs/experience/stories/*.md | xargs -I {} basename {} .md | sort > /tmp/stories.txt
+ls $STORIES_DIR/*.md | xargs -I {} basename {} .md | sort > /tmp/stories.txt
 
 # 既存テスト一覧
 ls tests/stories/*.e2e.ts 2>/dev/null | xargs -I {} basename {} .e2e.ts | sort > /tmp/story-tests.txt
@@ -77,8 +93,8 @@ comm -23 /tmp/stories.txt /tmp/story-tests.txt
 
 ```
 以下のストーリーのE2Eテストを作成してください:
-- .docs/experience/stories/domestic-ticket-purchase.md
-- .docs/experience/stories/navigation.md
+- $STORIES_DIR/domestic-ticket-purchase.md
+- $STORIES_DIR/navigation.md
 
 手順:
 1. ストーリーファイルを読み込む
@@ -105,7 +121,7 @@ FrontMatterによる分類:
 
 ### 命名規則
 
-- ストーリー: `.docs/experience/stories/domestic-ticket-purchase.md`
+- ストーリー: `$STORIES_DIR/domestic-ticket-purchase.md`
 - テスト: `tests/stories/domestic-ticket-purchase.e2e.ts`
 
 
