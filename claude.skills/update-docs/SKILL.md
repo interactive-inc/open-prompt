@@ -7,183 +7,248 @@ description: .docs/ の仕様書を更新する。「ドキュメント更新」
 
 `.docs/` の仕様書をコードと同期して更新する。
 
+## 基本方針
+
+メインは司令塔。実作業はサブエージェントで並列実行。
+
+- 探索: サブエージェントで並列
+- 更新: ファイルの数だけサブエージェントを並列実行
+- 不明点: サブエージェントはメインに戻す → メインで Ask → 解決後サブエージェントで並走
+- 最後: 仕様バグ・矛盾・食い違いをチェック
+
 ## ワークフロー
 
-### ステップ1: 変更対象の特定
-
-PRの差分から更新対象を特定する。
+### Phase 1: 変更対象の特定
 
 ```bash
 git diff main...HEAD --name-only
 ```
 
-### ステップ2: コード探索
+`--full` オプションがある場合は全ファイルを対象にする。
 
-Explore エージェントで変更されたコードを調査する。
+### Phase 2: 探索 (並列)
 
-### ステップ3: 仕様書の更新
+サブエージェント (Explore) で変更されたコードを並列調査。
 
-変更内容を該当する `.docs/` ファイルに反映する。
+### Phase 3: 更新 (並列)
 
-更新前に AskUserQuestion でユーザーに確認する。
+ファイルごとにサブエージェント (general-purpose) を並列起動。
 
-### ステップ4: CLAUDE.md の更新
-
-`.docs/` の構成が変更された場合、CLAUDE.md の `## Docs` セクションを更新する。
-
-## ディレクトリ構造
-
-### 全体構成
+サブエージェントへの指示:
 
 ```
-.docs/
-├── overview.md          # 製品全体像と連携
-├── architecture.md      # システム設計概要 (API、BaaS連携、データ配置)
-├── glossary.md          # 用語集
-├── notes/               # 補足情報 (外部連携設定、データフォーマット)
-└── products/            # 製品仕様
-    ├── shop/            # ECサイト
-    └── console/         # 管理画面
+記述ルールに従ってファイルを更新してください。
+不明点があればメインに戻してください。
 ```
 
-### 製品ディレクトリ (フラット構造)
+不明点が返ってきたら:
 
-各製品はフラットな構造を採用する。
+1. メインで AskUserQuestion で質問
+2. 解決したら再度サブエージェントで並走
+
+### Phase 4: 整合性チェック
+
+サブエージェントで仕様バグ・矛盾・食い違いをチェック。
+
+問題があれば:
+
+1. 該当ディレクトリに `issues/` を作成
+2. Issue ファイルを作成
+
+### Phase 5: Issue 解決
+
+Issue ごとにユーザーに質問。
+
+- 解決 → Issue ファイルを削除
+- 未解決 → FrontMatter で `status: unresolved` をマーク
+
+## Issue ファイル
+
+### 配置
+
+問題があるファイルと同じディレクトリに `issues/` を作成。
 
 ```
-products/shop/
-├── overview.md          # 製品概要
-├── architecture.md      # 技術構成
-├── database.md          # データベース設計 (詳細)
-├── personas.md          # ペルソナ
-├── stories/             # ユーザーストーリー
-├── actors.md            # アクター定義
-├── relationships.md     # エンティティ関係
-├── api.md               # API仕様
-├── sitemap.md           # サイトマップ
-├── models/              # ドメインモデル
-├── services/            # サービス仕様
-├── policies/            # ポリシー・権限
-├── integrations/        # 外部連携
-├── pages/               # ページ仕様
-└── features/            # 機能仕様
+.docs/products/<product>/
+├── features/
+│   ├── <feature>.md
+│   └── issues/
+│       └── YYYY-MM-DD.<issue-summary>.md
 ```
 
-### ファイル配置ルール
+### ファイル名
 
-- 単一ファイルで収まる仕様 → ルートに `.md` ファイル
-- 複数ファイルが必要な仕様 → ディレクトリを作成
+`YYYY-MM-DD.簡潔な説明.md`
 
-## CLAUDE.md の Docs セクション
+例: `2026-01-19.api-endpoint-count.md`
 
-`.docs/` のディレクトリ構成と読み方を CLAUDE.md に記載する。
-
-### 構成パターンの判定
-
-```bash
-ls .docs/
-```
-
-パターン:
-
-- `products/` がある → 複数製品パターン
-- `product/` がある → 単一製品パターン
-- どちらもない → シンプルパターン
-
-### 複数製品パターン (products/)
+### テンプレート
 
 ```markdown
-## Docs
+---
+status: unresolved
+related: <related-file>.md
+created: YYYY-MM-DD
+---
 
-`.docs/` にプロジェクトの仕様書がある。
+# 不一致の内容
 
-構成:
+<file>.md では「Xと記載」されているが、コードでは Y と定義されている。
 
-- `glossary.md` - 用語集
-- `products/` - 製品仕様
-  - `shop/` - ECサイト (このリポジトリ)
-  - `console/` - 管理画面
+確認事項:
 
-各製品はフラット構造:
-
-- `overview.md` - 製品概要
-- `architecture.md` - 技術構成
-- `personas.md` - ペルソナ
-- `stories/` - ユーザーストーリー
-- `pages/` - ページ仕様
-- `features/` - 機能仕様
-
-読み方:
-
-- 用語の確認 → `glossary.md`
-- 技術構成 → `products/shop/architecture.md`
-- ペルソナ → `products/shop/personas.md`
-- 画面仕様 → `products/shop/pages/`
-- 機能仕様 → `products/shop/features/`
+- 正しい値はどちらか
+- 変更があったか、追加予定があるか
 ```
 
-### 単一製品パターン (product/)
+### ステータス
 
-```markdown
-## Docs
-
-`.docs/` にプロジェクトの仕様書がある。
-
-構成:
-
-- `glossary.md` - 用語集
-- `product/` - 製品仕様
-
-読み方:
-
-- 用語の確認 → `glossary.md`
-- 技術構成 → `product/architecture.md`
-- ペルソナ → `product/personas.md`
-- 画面仕様 → `product/pages/`
-- 機能仕様 → `product/features/`
-```
-
-### 更新タイミング
-
-- `.docs/` のディレクトリ構成が変更された時
-- 新しいカテゴリが追加された時
-- 製品の対応関係が変更された時
-
-### 更新手順
-
-1. `.docs/` のディレクトリ構成を確認
-2. パターンを判定 (複数製品 / 単一製品 / シンプル)
-3. CLAUDE.md に `## Docs` セクションがあるか確認
-4. ない場合は `## Commands` の前に追加
-5. ある場合は内容を更新
-6. 複数製品の場合、リポジトリと製品の対応を明記
+- `status: unresolved` - 未解決
+- `status: resolved` - 解決済み (その後削除)
 
 ## 記述ルール
 
-### 図は必ず mermaid を使用 (必須)
+### 基本方針 (最重要)
 
-ドキュメント内の図は必ず mermaid 記法で記述する。ASCII アートやテキストベースの図は使用しない。
+コードから分かることは資料に書かない。
 
-使用する図の種類:
+資料の目的:
 
-- `flowchart` - システム構成、データフロー
-- `sequenceDiagram` - 処理フロー、認証フロー
-- `erDiagram` - データベース設計、エンティティ関係
+- 概要を整理して探索を助ける
+- コードから読み取れない意図や背景を残す
+
+書く内容:
+
+- システム全体の構成・関係性
+- 認証方式、データフローなどの設計概要
+- コードに現れない制約や注意事項
+- 技術選定の重要な理由 (脚注で)
+
+書かない内容:
+
+- API エンドポイント一覧
+- 関数・クラス・コンポーネントの一覧
+- データ構造の詳細
+- 実装の詳細手順
+- コードを読めば分かる仕様
+
+判断基準: 「コードを grep/read すれば分かるか?」 → Yes なら書かない
+
+### architecture.md と operations.md の役割分担
+
+architecture.md:
+
+- 技術スタック (フレームワーク、ライブラリ)
+- 状態管理、フォーム、スタイリングなどの構成
+- 用途の簡潔な説明
+
+operations.md:
+
+- デプロイ手順・コマンド
+- 監視方法・ツール
+- アラート設定
+- 障害対応・ロールバック
+
+### features/ の記述ルール
+
+非開発者が製品の機能を理解するための資料。
+
+見出し1の下に説明文、その下に箇条書き。
+
+禁止: 「目的」「概要」セクション、長い説明文、API エンドポイント、コンポーネント名、ルート構成、技術的な実装詳細
+
+### api.md の記述ルール
+
+書く内容: 認証方式、アーキテクチャ図、セキュリティヘッダー
+
+禁止: エンドポイント一覧、詳細説明
+
+### sitemap.md の記述ルール
+
+フラットな箇条書き。セクション分け・テーブル形式禁止。
+
+### services/ の記述ルール
+
+非開発者がサービスでできることを理解するための資料。
+
+見出し1の下に説明文、その下にユースケース(h3)を日本語で列挙。
+
+```markdown
+### 予約を作成する
+
+- 店舗・日時・目的を指定して来店予約を作成
+- ゲスト予約と会員予約の両方に対応
+```
+
+禁止: 英語のユースケース名 (CreateReservation など)、技術的な制約・副作用、API・コンポーネント名
+
+### 主観的表現の禁止
+
+禁止: 思想・ビジョン、将来の展望、「〜だからこそ」
+
+### 脚注の使用
+
+コードから読み取れない意図・背景は脚注で残す。
+
+ルール:
+
+- 必ず番号を使用 (`[^1]`, `[^2]`)
+- 名前付き脚注は禁止 (`[^oxygen]`, `[^tada]` など)
+- 脚注定義はファイル末尾に `---` で区切って配置
+- 全ての脚注を箇条書きで並べる
 
 例:
 
-```mermaid
-sequenceDiagram
-    participant A as ユーザー
-    participant B as システム
-    A->>B: リクエスト
-    B->>A: レスポンス
+```markdown
+## ランタイム
+
+Cloudflare Workers (Shopify Oxygen) [^1]
+
+## GraphQL
+
+gql.tada [^2]
+
+---
+
+- [^1]: Hydrogen 向けに最適化。KV バインディングが自動構成される。
+- [^2]: コード生成なしで型安全性を実現。
 ```
 
-## 注意事項
+### 図は必ず mermaid
 
-- 更新前に必ず AskUserQuestion で確認
-- CLAUDE.md の他のセクションは変更しない
-- `.docs/` が存在しない場合はスキップ
-- 製品の対応が不明な場合はユーザーに確認
-- 図は必ず mermaid で記述する (ASCII アート禁止)
+flowchart, sequenceDiagram, erDiagram を使用。ASCII アート禁止。
+
+## ディレクトリ構造
+
+```
+.docs/
+├── overview.md
+├── architecture.md
+├── glossary.md
+├── notes/
+└── products/
+    └── <product>/
+```
+
+製品ディレクトリ:
+
+```
+products/<product>/
+├── overview.md
+├── architecture.md
+├── operations.md
+├── database.md
+├── personas.md
+├── actors.md
+├── relationships.md
+├── api.md
+├── sitemap.md
+├── stories/
+├── models/
+├── services/
+├── policies/
+├── integrations/
+├── pages/
+├── features/
+└── issues/           # 仕様の問題点
+```

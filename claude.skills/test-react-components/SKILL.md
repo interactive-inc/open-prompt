@@ -1,25 +1,101 @@
 ---
 name: test-react-components
 description: "app/components の単体テストを作成・実行・修正する。React Testing Library + happy-dom を使用。"
+args: "[--full]"
 disable-model-invocation: true
 ---
 
-# Test Components
+# Test React Components
 
-`app/components/` のReactコンポーネント単体テストを作成・実行・修正する。
+`app/components/` のReactコンポーネント単体テストを作成・実行する。
 
-
-## ワークフロー
-
-
-### Phase 0: 戦略確認
-
-**必ず最初に [戦略](/.claude/strategies/test-pure-components.md) を読む。**
-
-戦略ファイルにはテスト対象の分類、探索方法、テストパターンが定義されている。
+メインエージェントは司令塔として動作し、実際の作業はサブエージェントに委任する。
 
 
-### Phase 1: セットアップ確認
+## 引数
+
+- `--full` - 全探索モード (探索対象ディレクトリ内の全コンポーネントを対象)
+- 引数なし - 差分モード (main ブランチとの差分コンポーネントのみ対象)
+
+
+## フロー図
+
+```mermaid
+flowchart TD
+    A[戦略ファイル確認] --> B{--full?}
+    B -->|Yes| C[全探索モード]
+    B -->|No| D[差分モード]
+    C --> E[探索対象から全コンポーネント取得]
+    D --> F[git diff main で変更コンポーネント取得]
+    E --> G[コンポーネント一覧]
+    F --> G
+    G --> H[除外フック使用をフィルタ]
+    H --> I[テスト済みを除外]
+    I --> J[セットアップ確認]
+    J --> K[サブエージェントで並列テスト作成]
+    K --> L{テスト可能?}
+    L -->|可能| M[テスト作成]
+    L -->|不可能| N[理由を報告]
+    M --> O[テスト実行]
+    N --> P[戦略ファイルに除外追加]
+    O --> Q{パス?}
+    Q -->|失敗| R[修正]
+    R --> O
+    Q -->|成功| S[全体テスト確認]
+    P --> S
+    S --> T[完了]
+```
+
+
+## 準備: 戦略ファイルを確認
+
+最初に `.claude/strategies/test-react-components.md` を確認する。
+
+ファイルが存在しない場合は、コードベースを探索して作成する。
+
+戦略ファイルには以下が定義されている:
+
+- 探索対象ディレクトリ
+- 除外フック一覧
+- テスト対象外
+- 発生した問題
+
+
+## フェーズ1: コンポーネント一覧を取得
+
+
+### 差分モード (デフォルト)
+
+main ブランチとの差分からコンポーネントファイルを取得する。
+
+```bash
+git diff --name-only main -- 'app/components/**/*.tsx' | grep -v '\.test\.tsx$' | grep -v '/ui/'
+```
+
+
+### 全探索モード (--full)
+
+探索対象ディレクトリから全コンポーネントを取得する。
+
+```bash
+find app/components -name "*.tsx" -not -name "*.test.tsx" -not -path "*/ui/*"
+```
+
+
+## フェーズ2: 除外フィルタ
+
+戦略ファイルの除外フックを使用しているコンポーネントを除外する。
+
+```bash
+EXCLUDE_HOOKS="useLoaderData\|useParams\|useSearchParams\|useNavigate\|useLocation\|useFetcher\|useMatches\|useLang\|useHref\|useHome\|useTranslationTag\|useTranslationData\|useParkingTranslationTag\|useUrlParams\|useUrlParamArray\|useAnchorSmoothScroller\|useSectionScrollNavigation\|useExcludedPage\|useKlookUrl\|useIsMobile\|useTicketStock"
+
+grep -rl "$EXCLUDE_HOOKS" app/components --include="*.tsx" | grep -v "\.test\.tsx"
+```
+
+既存の *.test.tsx ファイルを探し、対応するソースファイルをテスト済みとして除外する。
+
+
+## フェーズ3: セットアップ確認
 
 依存関係がインストール済みか確認。
 
@@ -36,109 +112,62 @@ bun add -D @testing-library/react @testing-library/dom happy-dom
 `tests/setup-dom.ts` と `bunfig.toml` が存在することを確認。
 
 
-### Phase 2: テスト対象の探索
+## フェーズ4: 並列でテスト作成
 
-**全ディレクトリを探索してテスト可能なコンポーネントを特定する。**
+残ったコンポーネントごとにサブエージェント (general-purpose) を並列起動する。
 
-`components.json` の `aliases.ui` ディレクトリ（shadcn/ui 公式）は除外する。
+各サブエージェントへの指示:
 
-```bash
-# 除外パターン定義（戦略ファイルと同期）
-EXCLUDE_HOOKS="useLoaderData\|useParams\|useSearchParams\|useNavigate\|useLocation\|useFetcher\|useMatches\|useLang\|useHref\|useHome\|useTranslationTag\|useTranslationData\|useParkingTranslationTag\|useUrlParams\|useUrlParamArray\|useAnchorSmoothScroller\|useSectionScrollNavigation\|useExcludedPage\|useKlookUrl\|useIsMobile\|useTicketStock"
+```
+ファイル: {コンポーネントファイルパス}
 
-# テスト不可のフックを使用しているコンポーネント数
-grep -rl "$EXCLUDE_HOOKS" app/components --include="*.tsx" | grep -v "\.test\.tsx" | wc -l
+このコンポーネントを読んで以下を判断する:
 
-# テスト可能なコンポーネント（ui/ と フック使用を除外）
-all_files=$(find app/components -name "*.tsx" -not -name "*.test.tsx" -not -path "*/ui/*" | sort)
-hook_files=$(grep -rl "$EXCLUDE_HOOKS" app/components --include="*.tsx" | grep -v "\.test\.tsx" | sort)
-comm -23 <(echo "$all_files") <(echo "$hook_files")
+テスト可能な条件:
+- 除外フックを使用していない
+- props で動作が制御される
+- UIレンダリングが確認できる
 
-# テストがないファイル（ui/ を除外）
-find app/components -name "*.tsx" -not -name "*.test.tsx" -not -path "*/ui/*" | while read f; do
-  test -f "${f%.tsx}.test.tsx" || echo "Missing: $f"
-done
+テスト不可能な条件:
+- 除外フックを使用している
+- 外部APIに依存している
+- 複雑な状態管理に依存している
+
+テスト可能な場合:
+- 同じディレクトリに *.test.tsx を作成
+- bun:test + @testing-library/react を使用
+- テストタイトルは日本語
+- 作成したテストファイルのパスを報告
+
+テスト不可能な場合:
+- 理由を具体的に報告
+- ファイルパスと理由のペアで報告
 ```
 
 
-### Phase 3: ユーザー確認
-
-探索結果をユーザーに提示し、以下を確認する：
-
-- 探索対象から漏れているディレクトリはないか
-- テスト対象外として除外すべきコンポーネントはないか
-- 優先的にテストすべきコンポーネントはあるか
-
-**AskUserQuestion を使用して確認すること。**
-
-
-### Phase 4: テスト作成
-
-戦略のテストパターンに従ってテストを作成。
-
-
-### Phase 5: テスト実行・修正
+## フェーズ5: テスト実行と修正
 
 ```bash
-# コンポーネントテストのみ実行
 bun test app/components
 ```
 
-失敗したテストを修正し、全テストがパスするまで繰り返す。
+失敗したテストがあれば修正する。
+
+全テストがパスするまで繰り返す。
 
 
-### Phase 6: 全体テスト確認
+## フェーズ6: 全体テスト確認
 
-**必ず全体のテストを実行して、他のテストに影響がないことを確認する。**
+全体のテストを実行して、他のテストに影響がないことを確認する。
 
 ```bash
-# 全テスト実行
 bun test
 ```
 
-全テストがパスすることを確認する。失敗した場合は原因を調査し修正する。
-
 よくある問題:
-- グローバル環境（window, document）を上書きするテストが他のテストに影響を与える
+
+- グローバル環境 (window, document) を上書きするテストが他に影響
 - `beforeAll` / `afterAll` で環境を保存・復元していない
-
-
-## 除外フック一覧
-
-戦略ファイルで定義された除外対象フック:
-
-
-### React Router 直接依存
-
-- `useLoaderData`
-- `useParams`
-- `useSearchParams`
-- `useNavigate`
-- `useLocation`
-- `useFetcher`
-- `useMatches`
-
-
-### プロジェクト固有フック（Router間接依存）
-
-- `useLang` → useParams依存
-- `useHref` → useLocation依存
-- `useHome` → useLocation依存
-- `useTranslationTag` → useLocation, useMatches依存
-- `useTranslationData` → useLocation依存
-- `useParkingTranslationTag` → useLocation, useMatches依存
-- `useUrlParams` → useLocation依存
-- `useUrlParamArray` → useUrlParams依存
-- `useAnchorSmoothScroller` → useLocation依存
-- `useSectionScrollNavigation` → useLocation依存
-- `useExcludedPage` → useLocation, useLang依存
-- `useKlookUrl` → useTranslationTag依存
-
-
-### ブラウザAPI / 外部API依存
-
-- `useIsMobile` → window.innerWidth依存
-- `useTicketStock` → 外部API依存
 
 
 ## テスト作成ルール
@@ -154,23 +183,23 @@ bun test
 ## テンプレート
 
 ```typescript
-import { test, expect } from "bun:test"
+import { expect, test } from "bun:test"
 import { render, screen } from "@testing-library/react"
 import { Button } from "./button"
 
-test("正常系：デフォルトのボタンをレンダリングする", () => {
+test("正常系: デフォルトのボタンをレンダリングする", () => {
   render(<Button>Click me</Button>)
   const button = screen.getByRole("button", { name: "Click me" })
   expect(button).toBeDefined()
 })
 
-test("正常系：variant=orange でスタイルが適用される", () => {
+test("正常系: variant=orange でスタイルが適用される", () => {
   render(<Button variant="orange">Submit</Button>)
   const button = screen.getByRole("button")
   expect(button.className).toContain("bg-orange")
 })
 
-test("正常系：disabled 属性が適用される", () => {
+test("正常系: disabled 属性が適用される", () => {
   render(<Button disabled>Disabled</Button>)
   const button = screen.getByRole("button")
   expect(button.hasAttribute("disabled")).toBe(true)
@@ -185,7 +214,7 @@ react-router の `Link` を使用するコンポーネントは `MemoryRouter` �
 ```typescript
 import { MemoryRouter } from "react-router"
 
-test("正常系：リンクがレンダリングされる", () => {
+test("正常系: リンクがレンダリングされる", () => {
   render(
     <MemoryRouter>
       <DocLink href="/test">リンク</DocLink>
@@ -204,26 +233,10 @@ test("正常系：リンクがレンダリングされる", () => {
 4. `getByTestId` - 最終手段
 
 
-## よくあるエラー
+## 戦略ファイルの更新
 
-**要素が見つからない:**
+テスト作成中に以下を発見したら `.claude/strategies/test-react-components.md` を更新する:
 
-```
-Unable to find an element with the role "button"
-```
-
-→ `screen.debug()` でDOMを確認
-
-**document is not defined:**
-
-→ `tests/setup-dom.ts` と `bunfig.toml` を確認
-
-**requestAnimationFrame is not defined:**
-
-→ `tests/setup-dom.ts` に以下を追加:
-
-```typescript
-globalThis.requestAnimationFrame = window.requestAnimationFrame.bind(window)
-globalThis.cancelAnimationFrame = window.cancelAnimationFrame.bind(window)
-globalThis.ResizeObserver = window.ResizeObserver
-```
+- 新しい除外フック
+- テスト対象外コンポーネントと理由
+- 発生した問題 (エラー、ワークアラウンドなど)

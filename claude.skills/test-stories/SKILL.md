@@ -1,31 +1,86 @@
 ---
 name: test-stories
-description: ユーザーストーリーからE2Eテストを作成・更新するスキル。.docs/のストーリーに基づいてPlaywrightテストを生成する。
+description: ユーザーストーリーからE2Eテストを作成・更新するスキル。ストーリーに基づいてPlaywrightテストを生成する。
+args: "[--full]"
 disable-model-invocation: true
 ---
 
-# 指示
+# Test Stories
 
-このスキルが呼び出されたら、以下の手順を実行する。
+ユーザーストーリーからE2Eテストを作成・実行する。
+
+メインエージェントは司令塔として動作し、実際の作業はサブエージェントに委任する。
 
 
-## ストーリーディレクトリの特定
+## 引数
 
-まず `.docs/` の構成を確認してストーリーのパスを特定する。
+- `--full` - 全探索モード (戦略ファイルの全ストーリーを対象)
+- 引数なし - 差分モード (main ブランチとの差分ストーリーのみ対象)
 
-```bash
-ls .docs/
+
+## フロー図
+
+```mermaid
+flowchart TD
+    A[戦略ファイル確認] --> B{--full?}
+    B -->|Yes| C[全探索モード]
+    B -->|No| D[差分モード]
+    C --> E[戦略ファイルから全ストーリー取得]
+    D --> F[git diff main で変更ストーリー取得]
+    E --> G[テスト対象ストーリー一覧]
+    F --> G
+    G --> H[初期セットアップ確認]
+    H --> I[既存テストと比較]
+    I --> J[不足テストを特定]
+    J --> K[サブエージェントで並列テスト作成]
+    K --> L[テスト実行]
+    L --> M{パス?}
+    M -->|失敗| N[修正]
+    N --> L
+    M -->|成功| O[完了]
 ```
 
-パターン:
 
-- `products/` がある → `.docs/products/{product}/stories/` (複数製品)
-- `product/` がある → `.docs/product/stories/` (単一製品)
+## 準備: 戦略ファイルを確認
 
-以降、特定したパスを `STORIES_DIR` として使用する。
+最初に `.claude/strategies/test-stories.md` を確認する。
+
+ファイルが存在しない場合は、以下の手順で作成する:
+
+- ストーリーファイルのディレクトリを特定
+- ストーリー一覧を作成
+- 戦略ファイルを作成
+
+戦略ファイルには以下が定義されている:
+
+- `STORIES_DIR` - ストーリーファイルのディレクトリ
+- テスト対象外
 
 
-## 初期セットアップ確認
+## フェーズ1: テスト対象ストーリーを特定
+
+
+### 差分モード (デフォルト)
+
+main ブランチとの差分からストーリーファイルを取得する。
+
+```bash
+# STORIES_DIR は戦略ファイルで定義されたパス
+git diff --name-only main -- '${STORIES_DIR}/*.md'
+```
+
+
+### 全探索モード (--full)
+
+参照ドキュメントのディレクトリ内の全ストーリーを対象とする。
+
+```bash
+# STORIES_DIR は戦略ファイルで定義されたパス
+ls ${STORIES_DIR}/*.md
+```
+
+
+## フェーズ2: 初期セットアップ確認
 
 
 ### playwright.config.ts
@@ -34,6 +89,9 @@ ls .docs/
 
 - `video: "off"`
 - `screenshot: "off"`
+- `fullyParallel: true`
+- `workers: 4` (ローカル) / `2` (CI)
+- `reuseExistingServer: true`
 
 
 ### .gitignore
@@ -46,28 +104,11 @@ playwright-report/
 ```
 
 
-## 開発サーバーの起動
+## フェーズ3: 不足テストを特定
 
 ```bash
-# サーバーが起動していなければ起動
-lsof -i :5173 2>/dev/null | grep -q LISTEN || bun run dev &
-sleep 3
-```
-
-
-## ストーリーファイルの読み込み
-
-```bash
-# 全ストーリーファイルを一覧
-ls $STORIES_DIR/*.md
-```
-
-
-## 不足テストの特定
-
-```bash
-# ストーリーファイル一覧
-ls $STORIES_DIR/*.md | xargs -I {} basename {} .md | sort > /tmp/stories.txt
+# ストーリーファイル一覧 (STORIES_DIR は戦略ファイルで定義)
+ls ${STORIES_DIR}/*.md | xargs -I {} basename {} .md | sort > /tmp/stories.txt
 
 # 既存テスト一覧
 ls tests/stories/*.e2e.ts 2>/dev/null | xargs -I {} basename {} .e2e.ts | sort > /tmp/story-tests.txt
@@ -77,55 +118,62 @@ comm -23 /tmp/stories.txt /tmp/story-tests.txt
 ```
 
 
-## テストの作成（並列処理）
+## フェーズ4: 並列でテスト作成
 
-不足テストが複数ある場合、**サブエージェントを並列起動**してテストを作成する。
+不足ストーリーごとにサブエージェント (general-purpose) を並列起動する。
 
-
-### 並列処理の方針
-
-- 3ストーリー以上の場合: Task ツールで複数のサブエージェントを同時起動
-- 各サブエージェントに 2-3 ストーリーを割り当て
-- サブエージェントはストーリーを読み、agent-browser で構造確認、テスト作成
-
-
-### サブエージェントへの指示例
+各サブエージェントへの指示:
 
 ```
-以下のストーリーのE2Eテストを作成してください:
-- $STORIES_DIR/domestic-ticket-purchase.md
-- $STORIES_DIR/navigation.md
+ストーリー: {ストーリーファイルパス}
+
+このストーリーを読んでE2Eテストを作成する:
 
 手順:
 1. ストーリーファイルを読み込む
-2. FrontMatter（persona: または test-aspect:）を確認
+2. FrontMatter (persona: または test-aspect:) を確認
 3. 各ステップで agent-browser を使ってページ構造を確認
 4. tests/stories/<story-name>.e2e.ts にテストを作成
 
 テンプレート:
 import { expect, test } from "@playwright/test"
 
-test.describe("チケット購入 @persona:domestic", () => {
-  test("ホームからチケットページへ遷移できる", async ({ page }) => {
+test.describe("ストーリー名 @persona:xxx", () => {
+  test("ステップの説明", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" })
-    await page.getByRole("link", { name: "チケットガイド", exact: true }).click()
-    await expect(page).toHaveURL(/\/ticket/)
+    // テスト内容
   })
 })
 
 FrontMatterによる分類:
 - persona: 国内来園者 → @persona:domestic
 - test-aspect: 多言語対応 → @test-aspect:i18n
+
+作成したテストファイルのパスを報告する。
 ```
 
 
 ### 命名規則
 
-- ストーリー: `$STORIES_DIR/domestic-ticket-purchase.md`
-- テスト: `tests/stories/domestic-ticket-purchase.e2e.ts`
+- ストーリー: `${STORIES_DIR}/<story-name>.md`
+- テスト: `tests/stories/<story-name>.e2e.ts`
 
 
-## テストの実行と修正
+## フェーズ5: テスト実行と修正
+
+
+### 差分モード
+
+変更されたストーリーのみテスト:
+
+```bash
+bunx playwright test --project=stories -g "story1|story2"
+```
+
+
+### 全探索モード
+
+全ストーリーテスト:
 
 ```bash
 bunx playwright test --project=stories
@@ -133,15 +181,12 @@ bunx playwright test --project=stories
 
 失敗したテストがあれば修正する。
 
+全テストがパスするまで繰り返す。
 
-## 完了確認
 
-```bash
-# 不足テストがないことを確認
-comm -23 /tmp/stories.txt /tmp/story-tests.txt
+## 戦略ファイルの更新
 
-# 全テスト通過を確認
-bunx playwright test --project=stories
-```
+テスト作成中に以下を発見したら `.claude/strategies/test-stories.md` を更新する:
 
-出力がなく、全テストが通過すれば完了。
+- テスト対象外ストーリーと理由
+- 発生した問題 (エラー、ワークアラウンドなど)
