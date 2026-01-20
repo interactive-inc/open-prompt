@@ -91,7 +91,7 @@ updated-at: YYYY-MM-DD
 
 ---
 
-- [^1]: YYYY-MM-DD - 開発の背景や判断理由
+[^1]: YYYY-MM-DD - 開発の背景や判断理由
 ```
 
 ### 書くこと
