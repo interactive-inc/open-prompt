@@ -62,6 +62,48 @@ Issue ごとにユーザーに質問。
 - 解決 → Issue ファイルを削除
 - 未解決 → FrontMatter で `status: unresolved` をマーク
 
+### Phase 6: CLAUDE.md の同期
+
+CLAUDE.md に `## Docs` セクションがあるか確認。
+
+なければ、以下の形式で追記:
+
+```markdown
+## Docs
+
+`.docs/` に仕様書を配置。
+
+- `glossary.md` - 用語の正式名称を確認してハルシネーションを回避
+- `features/` - 機能の仕様を確認して実装漏れを防ぐ
+- `integrations/` - 外部サービス連携の仕様を確認
+- `stories/` - ユーザーストーリーを確認して要件を把握
+
+`.docs/` 配下のディレクトリツリー
+```
+
+ルール:
+
+- 見出しは必ず `## Docs` (固定)
+- 実際の `.docs/` 構造をそのまま反映
+- 抽象化せず、存在するディレクトリ・ファイルのみ記載
+
+製品ディレクトリの判定:
+
+- `product/` (単数) → 製品が1つ
+- `products/` (複数) → 製品が複数。CLAUDE.md に `Product: <製品名>` を記載
+- どちらもない → AskUserQuestion でどんな製品があるか尋ねる
+- `products/` だが CLAUDE.md に該当製品の記載がない → AskUserQuestion で尋ねる
+
+複数製品の場合の CLAUDE.md 記載形式:
+
+```markdown
+## Docs
+
+Product: website
+
+`.docs/` に仕様書を配置。
+```
+
 ## Issue ファイル
 
 ### 配置
@@ -221,6 +263,22 @@ flowchart, sequenceDiagram, erDiagram を使用。ASCII アート禁止。
 
 ## ディレクトリ構造
 
+単一製品の場合:
+
+```
+.docs/
+├── overview.md
+├── architecture.md
+├── glossary.md
+├── notes/
+└── product/              # 製品仕様は直下に配置
+    ├── overview.md
+    ├── features/
+    └── ...
+```
+
+複数製品の場合:
+
 ```
 .docs/
 ├── overview.md
@@ -228,13 +286,14 @@ flowchart, sequenceDiagram, erDiagram を使用。ASCII アート禁止。
 ├── glossary.md
 ├── notes/
 └── products/
-    └── <product>/
+    ├── <product-a>/
+    └── <product-b>/
 ```
 
-製品ディレクトリ:
+製品ディレクトリの内容:
 
 ```
-products/<product>/
+# product/ または products/<product-name>/
 ├── overview.md
 ├── architecture.md
 ├── operations.md
