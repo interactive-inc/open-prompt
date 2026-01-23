@@ -18,6 +18,25 @@ description: .docs/ の仕様書を更新する。「ドキュメント更新」
 
 ## ワークフロー
 
+### Phase 0: 初期化（初回のみ）
+
+`.docs/` ディレクトリが存在しない、または `product/` も `products/` もない場合は初回実行。
+
+初回実行時:
+
+1. AskUserQuestion で製品数を確認:
+   - 「このリポジトリにはいくつの製品がありますか？」
+   - 選択肢: 「1つ」「複数」
+2. 回答に応じてディレクトリを作成:
+   - 1つ → `.docs/product/`
+   - 複数 → AskUserQuestion で製品名を確認 → `.docs/products/<name>/`
+
+既存の `.docs/` がある場合:
+
+- `product/` がある → 単一製品として継続
+- `products/` がある → 複数製品として継続
+- どちらもない → 初回実行と同様に確認
+
 ### Phase 1: 変更対象の特定
 
 ```bash
@@ -89,10 +108,9 @@ CLAUDE.md に `## Docs` セクションがあるか確認。
 
 製品ディレクトリの判定:
 
-- `product/` (単数) → 製品が1つ
+- `product/` (単数) → 製品が1つ。`Product:` 記載は不要
 - `products/` (複数) → 製品が複数。CLAUDE.md に `Product: <製品名>` を記載
-- どちらもない → AskUserQuestion でどんな製品があるか尋ねる
-- `products/` だが CLAUDE.md に該当製品の記載がない → AskUserQuestion で尋ねる
+- どちらもない → Phase 0 で確認済みのはず。確認されていなければ AskUserQuestion で尋ねる
 
 複数製品の場合の CLAUDE.md 記載形式:
 
