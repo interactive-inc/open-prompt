@@ -92,4 +92,26 @@ RyukyuInteractive/inta#skills:
   - skills/stack/references/tanstack/session-context.md
   - skills/stack/references/tanstack/suspense-use.md
   - skills/stack/references/tanstack/tanstack-start/basic-auth.md
-  - skills/test-lib/SKILL.md
+  - skills/test/SKILL.md
+  - skills/test/commands/a11y.md
+  - skills/test/commands/diff.md
+  - skills/test/commands/unit.md
+  - skills/test/commands/visual.md
+  - skills/test/references/a11y-google-sheets.md
+  - skills/test/references/a11y-index-template.html
+  - skills/test/references/a11y-report-design.md
+  - skills/test/references/diff-categories.md
+  - skills/test/references/diff-report-template.md
+  - skills/test/references/wcag-checklist.md
+  - skills/test/references/wcag-level-a.md
+  - skills/test/scripts/a11y/a11y-interactive-test.ts
+  - skills/test/scripts/a11y/a11y-test.ts
+  - skills/test/scripts/a11y/a11y-tree.ts
+  - skills/test/scripts/a11y/a11y-visual-test.ts
+  - skills/test/scripts/a11y/bun.lock
+  - skills/test/scripts/a11y/generate-checklist-xlsx.ts
+  - skills/test/scripts/a11y/package.json
+  - skills/test/scripts/diff/batch-overlay.ts
+  - skills/test/scripts/diff/figma-export.ts
+  - skills/test/scripts/diff/generate-report.ts
+  - skills/test/scripts/diff/overlay-compose.ts
