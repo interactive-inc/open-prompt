@@ -70,26 +70,26 @@ RyukyuInteractive/inta#skills:
   - agents/hacker.md
   - rules/md.md
   - rules/ts.md
-  - skills/software-stack-cli/SKILL.md
-  - skills/software-stack-hono/SKILL.md
-  - skills/software-stack-hono/references/application-service.md
-  - skills/software-stack-hono/references/domain-entity.md
-  - skills/software-stack-hono/references/domain-error.md
-  - skills/software-stack-hono/references/domain-value.md
-  - skills/software-stack-hono/references/drizzle-schema.md
-  - skills/software-stack-hono/references/infrastructure-adapter.md
-  - skills/software-stack-hono/references/infrastructure-repository.md
-  - skills/software-stack-hono/references/interface-entry-point.md
-  - skills/software-stack-hono/references/interface-error-handling.md
-  - skills/software-stack-hono/references/interface-route-handler.md
-  - skills/software-stack-hono/references/lib-structure.md
-  - skills/software-stack-tanstack/SKILL.md
-  - skills/software-stack-tanstack/references/auth.md
-  - skills/software-stack-tanstack/references/cloudflare.md
-  - skills/software-stack-tanstack/references/hc-client.md
-  - skills/software-stack-tanstack/references/hono-api.md
-  - skills/software-stack-tanstack/references/session-context.md
-  - skills/software-stack-tanstack/references/suspense-use.md
-  - skills/software-stack-tanstack/references/tanstack-start/basic-auth.md
-  - skills/software-stack/SKILL.md
+  - skills/stack/SKILL.md
+  - skills/stack/references/cli.md
+  - skills/stack/references/hono.md
+  - skills/stack/references/hono/application-service.md
+  - skills/stack/references/hono/domain-entity.md
+  - skills/stack/references/hono/domain-error.md
+  - skills/stack/references/hono/domain-value.md
+  - skills/stack/references/hono/drizzle-schema.md
+  - skills/stack/references/hono/infrastructure-adapter.md
+  - skills/stack/references/hono/infrastructure-repository.md
+  - skills/stack/references/hono/interface-entry-point.md
+  - skills/stack/references/hono/interface-error-handling.md
+  - skills/stack/references/hono/interface-route-handler.md
+  - skills/stack/references/hono/lib-structure.md
+  - skills/stack/references/tanstack.md
+  - skills/stack/references/tanstack/auth.md
+  - skills/stack/references/tanstack/cloudflare.md
+  - skills/stack/references/tanstack/hc-client.md
+  - skills/stack/references/tanstack/hono-api.md
+  - skills/stack/references/tanstack/session-context.md
+  - skills/stack/references/tanstack/suspense-use.md
+  - skills/stack/references/tanstack/tanstack-start/basic-auth.md
   - skills/test-lib/SKILL.md

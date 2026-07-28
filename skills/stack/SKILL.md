@@ -1,20 +1,13 @@
 ---
-name: software-stack
-description: Pick a stack skill for the project shape and decide which cross-cutting tools to install. Routes CLI/TUI/SDK to software-stack-cli, Hono backend to software-stack-hono, React SPA to software-stack-tanstack, React SSR/RSC to Next.js. Each tool entry tells you when to install, why, and how.
+name: stack
+description: Pick a stack for the project shape and decide which cross-cutting tools to install. Routes CLI/TUI/SDK to references/cli.md, Hono backend to references/hono.md, React SPA to references/tanstack.md, React SSR/RSC to Next.js. Each tool entry tells you when to install, why, and how.
 user-invocable: false
 disable-model-invocation: false
-metadata:
-  author: shigurenimo
-  type: reference
-  description: 技術選定と共有ツール選定をカバーするメタスキル。
-  design: プロジェクト形態からスタックを振り分け横断ツールの導入と移行を判断するメタ指針。技術選定という設計判断に直結する土台となる。
-  dev: true
-  tags: [stack]
 ---
 
-# software-stack
+# Stack
 
-Route by project shape. CLI, TUI, or SDK library go to software-stack-cli. Hono backend goes to software-stack-hono. React SPA with typed routing goes to software-stack-tanstack. React SSR or RSC on Vercel uses Next.js directly.
+Route by project shape. CLI, TUI, or SDK library go to [cli.md](references/cli.md). Hono backend goes to [hono.md](references/hono.md). React SPA with typed routing goes to [tanstack.md](references/tanstack.md). React SSR or RSC on Vercel uses Next.js directly.
 
 Prefer CLI over plugin over skill over MCP. MCP is the last resort. If a CLI replaces an MCP, remove the MCP. Strip duplicates aggressively.
 

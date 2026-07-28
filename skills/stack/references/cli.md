@@ -1,22 +1,8 @@
----
-name: software-stack-cli
-description: TypeScript CLI/TUI/SDK library design on Bun + Hono + zod + vite-plus + vitest. One package hosts a daemon, a CLI, a TUI, and an importable library off the same composition root. Every IO boundary is a port type and every IO-heavy class extracts a pure inner class so the whole thing is mockable end to end.
-user-invocable: false
-disable-model-invocation: false
-metadata:
-  author: shigurenimo
-  type: reference
-  description: Bun + Hono + zod + vite-plus + vitest ベースの TypeScript CLI / TUI / SDK ライブラリ開発スキル。
-  design: ポート分離と純粋ロジック抽出で全面モック可能にする CLI/TUI/SDK のアーキテクチャ指針。コード設計の判断に適用する土台となる。
-  dev: true
-  tags: [stack]
----
-
 # CLI / TUI / SDK Library
 
 A single package that ships as a CLI, a TUI, and an embeddable library, all driven by the same composition root. The design optimises for full mockability: each IO boundary is exposed as a port type and each IO-heavy class extracts a pure sibling.
 
-Toolchain (vite-plus, vitest, `@/*` alias, fmt/lint config) lives in software-stack under vp.
+Toolchain (vite-plus, vitest, `@/*` alias, fmt/lint config) lives in [the stack skill](../SKILL.md) under vp.
 
 ## Layout
 

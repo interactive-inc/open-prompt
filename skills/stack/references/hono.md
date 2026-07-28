@@ -1,17 +1,3 @@
----
-name: software-stack-hono
-description: "?"
-user-invocable: false
-disable-model-invocation: false
-metadata:
-  author: shigurenimo
-  type: reference
-  description: Hono フレームワークを用いた TypeScript バックエンド開発スキル。
-  design: Interface から Domain への一方向の層構造とドメイン設計を規定する Hono バックエンドの指針。コードとドメイン設計の判断に適用する土台となる。
-  dev: true
-  tags: [tools]
----
-
 # Hono Backend
 
 Layered (Interface → Application → Infrastructure → Domain). Lib は横断のみ。
@@ -78,33 +64,33 @@ api/
 
 ### Domain
 
-- [Entity](references/domain-entity.md)
-- [Value Object](references/domain-value.md)
-- [Error](references/domain-error.md)
+- [Entity](hono/domain-entity.md)
+- [Value Object](hono/domain-value.md)
+- [Error](hono/domain-error.md)
 
 ### Application
 
-- [Service](references/application-service.md)
+- [Service](hono/application-service.md)
 
 ### Infrastructure
 
-- [Repository](references/infrastructure-repository.md)
-- [Adapter](references/infrastructure-adapter.md)
+- [Repository](hono/infrastructure-repository.md)
+- [Adapter](hono/infrastructure-adapter.md)
 
 ### Interface
 
-- [Route Handler](references/interface-route-handler.md)
-- [Entry Point](references/interface-entry-point.md)
-- [Error Handling](references/interface-error-handling.md)
+- [Route Handler](hono/interface-route-handler.md)
+- [Entry Point](hono/interface-entry-point.md)
+- [Error Handling](hono/interface-error-handling.md)
 
 ### Common
 
-- [Drizzle Schema](references/drizzle-schema.md)
-- [Lib](references/lib-structure.md)
+- [Drizzle Schema](hono/drizzle-schema.md)
+- [Lib](hono/lib-structure.md)
 
 ## Claude Tools
 
-横断ツールは software-stack を参照。
+横断ツールは [stack スキル](../SKILL.md) を参照。
 
 ### hono-skill
 
